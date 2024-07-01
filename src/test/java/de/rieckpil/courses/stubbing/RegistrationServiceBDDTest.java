@@ -31,5 +31,24 @@ public class RegistrationServiceBDDTest {
 
   @Test
   void basicStubbingWithBDD() {
+    BDDMockito
+      .given(userRepository.findByUsername("duke"))
+      .willReturn(new User());
+
+    BDDMockito
+      .given(userRepository.save(any(User.class)))
+      .will(invocation -> {
+        User user = invocation.getArgument(0);
+        user.setId(42L);
+        return user;
+      });
+
+    BDDMockito
+      .given(userRepository.findByUsername("mike"))
+      .willThrow(new RuntimeException("Error in DB"));
+
+    System.out.println(userRepository.findByUsername("duke"));
+    System.out.println(userRepository.save(new User()).getId());
+    assertThrows(RuntimeException.class, () -> System.out.println(userRepository.findByUsername("mike")));
   }
 }
